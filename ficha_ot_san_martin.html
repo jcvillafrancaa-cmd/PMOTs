@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ficha OT — San Martín (muestra para visor)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFF9EF; --bg-card:#FFFFFF; --soft:#FBF5E9;
+    --ink:#2B2440; --ink-dim:#746E8A; --line:#EDE4D1;
+    --coral:#FF6259; --mari:#FFB100; --turq:#1FBFA3; --viol:#6C63FF; --gris:#9AA0AE; --naran:#FF8A3D;
+    --dep:#E0457B;
+    --map-bg:#F4ECDD; --map-line:#E3D6BE; --map-hill:#EADFC9; --river:#8CCFEA;
+    --track-lo:#F1ECDF; --track-mid:#FFE29A; --track-hi:#1FBFA3;
+    --shadow:0 18px 50px rgba(43,36,64,.16), 0 2px 6px rgba(43,36,64,.06);
+    --radius:16px;
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#1B1726; --bg-card:#25202F; --soft:#2D2739;
+      --ink:#F4EFFF; --ink-dim:#A9A2BF; --line:#3B344B;
+      --map-bg:#1F1A2A; --map-line:#2F2840; --map-hill:#272135; --river:#3E7F9B;
+      --track-lo:#3A3448; --track-mid:#8A6B1C;
+      --shadow:0 18px 50px rgba(0,0,0,.45);
+      color-scheme:dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#1B1726; --bg-card:#25202F; --soft:#2D2739;
+    --ink:#F4EFFF; --ink-dim:#A9A2BF; --line:#3B344B;
+    --map-bg:#1F1A2A; --map-line:#2F2840; --map-hill:#272135; --river:#3E7F9B;
+    --track-lo:#3A3448; --track-mid:#8A6B1C;
+    --shadow:0 18px 50px rgba(0,0,0,.45);
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box;}
+  :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);}
+  html,body{margin:0;padding:0;height:100%;}
+  body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3,h4{font-family:'Poppins','Inter',system-ui,sans-serif;margin:0;}
+  .mono{font-family:'JetBrains Mono',ui-monospace,monospace;}
+  .eyebrow{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-dim);}
+  button{font:inherit;color:inherit;}
+  :focus-visible{outline:2.5px solid var(--viol);outline-offset:2px;border-radius:6px;}
+
+  /* ============ ESCENARIO (simulación de visor) ============ */
+  .stage{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;}
+  .map{position:absolute;inset:0;background:var(--map-bg);}
+  .map svg{width:100%;height:100%;display:block;}
+  .map-caption{position:absolute;left:18px;bottom:16px;display:flex;gap:8px;align-items:center;
+    background:var(--bg-card);border:1px solid var(--line);border-radius:30px;padding:6px 12px;font-size:11.5px;color:var(--ink-dim);}
+  .map-caption .dot{width:9px;height:9px;border-radius:50%;background:var(--dep);}
+  .map-title{position:absolute;left:18px;top:16px;background:var(--bg-card);border:1px solid var(--line);border-radius:12px;padding:10px 14px;max-width:300px;}
+  .map-title b{font-family:'Poppins',sans-serif;font-size:14px;display:block;}
+  .map-title span{font-size:12px;color:var(--ink-dim);}
+
+  /* ============ POPUP ============ */
+  .popup{
+    position:relative;width:468px;max-width:100%;
+    height:min(740px, calc(100vh - 32px));
+    display:flex;flex-direction:column;
+    background:var(--bg);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);
+    z-index:5;
+  }
+  .popup .tail{position:absolute;left:-9px;top:50%;width:18px;height:18px;background:var(--bg);
+    border-left:1px solid var(--line);border-bottom:1px solid var(--line);transform:translateY(-50%) rotate(45deg);}
+  .pop-head{padding:16px 18px 12px;border-bottom:1px solid var(--line);position:relative;border-radius:20px 20px 0 0;background:var(--bg);}
+  .pop-head::before{content:"";position:absolute;left:0;right:0;top:0;height:5px;border-radius:20px 20px 0 0;background:var(--dep);}
+  .head-top{display:flex;gap:12px;align-items:flex-start;}
+  .head-top .txt{flex:1;min-width:0;}
+  .head-top h2{font-size:23px;font-weight:700;line-height:1.15;margin-top:4px;}
+  .norma{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--ink-dim);margin-top:3px;}
+  .badge{font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.05em;padding:4px 9px;border-radius:20px;white-space:nowrap;}
+  .badge.ok{background:#E5F9F2;color:#0E8E6D;}
+  .badge.no{background:#FFF1E0;color:#9A5B00;}
+  .head-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
+  .grapes svg{display:block;}
+  .grapes circle{cursor:help;}
+  .close{position:absolute;right:10px;top:10px;width:28px;height:28px;border-radius:50%;border:1px solid var(--line);background:var(--bg-card);
+    display:none;align-items:center;justify-content:center;cursor:pointer;font-size:15px;line-height:1;color:var(--ink-dim);}
+  .facts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;}
+  .fact{background:var(--bg-card);border:1px solid var(--line);border-radius:10px;padding:7px 9px;}
+  .fact b{font-family:'Poppins',sans-serif;font-size:14px;display:block;line-height:1.2;}
+  .fact span{font-size:10.5px;color:var(--ink-dim);line-height:1.25;display:block;margin-top:2px;}
+
+  .tabs{display:flex;gap:4px;padding:8px 12px 0;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line);background:var(--bg);}
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab{border:none;background:none;padding:8px 9px 9px;font-size:12.5px;font-weight:600;color:var(--ink-dim);cursor:pointer;
+    border-bottom:3px solid transparent;white-space:nowrap;border-radius:6px 6px 0 0;}
+  .tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--dep);}
+  .tab:hover{color:var(--ink);}
+
+  .pop-body{flex:1;overflow-y:auto;padding:16px 18px 20px;scroll-behavior:smooth;}
+  .panel[hidden]{display:none;}
+  .lead{font-size:12.5px;color:var(--ink-dim);margin:0 0 14px;}
+  .sub-h{font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;margin:20px 0 10px;}
+  .sub-h:first-child{margin-top:0;}
+
+  .pop-foot{border-top:1px solid var(--line);padding:9px 18px;display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:11px;color:var(--ink-dim);background:var(--bg);border-radius:0 0 20px 20px;}
+  .linkbtn{border:none;background:none;padding:0;cursor:pointer;font-size:11.5px;font-weight:600;color:var(--viol);text-decoration:underline;text-underline-offset:3px;}
+
+  /* ---- Horizonte ---- */
+  .horizon{background:var(--bg-card);border:1px solid var(--line);border-radius:14px;padding:12px 14px 14px;}
+  .horizon .row{display:flex;justify-content:space-between;align-items:baseline;}
+  .horizon .row b{font-family:'Poppins',sans-serif;font-size:13.5px;}
+  .h-track{position:relative;height:12px;border-radius:8px;background:var(--track-lo);margin-top:10px;}
+  .h-fill{position:absolute;left:0;top:0;bottom:0;border-radius:8px;background:linear-gradient(90deg,var(--mari),var(--dep));}
+  .h-now{position:absolute;top:-5px;width:3px;height:22px;background:var(--ink);border-radius:2px;transform:translateX(-50%);}
+  .h-scale{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-dim);margin-top:6px;}
+
+  /* ---- Resumen ---- */
+  .sum-grid{display:grid;grid-template-columns:1fr 128px;gap:10px;align-items:center;margin-top:14px;}
+  .radar-box svg{width:100%;height:auto;display:block;}
+  .kpis{display:flex;flex-direction:column;gap:8px;}
+  .kpi{background:var(--bg-card);border:1px solid var(--line);border-radius:12px;padding:9px 11px;border-bottom:4px solid var(--k,var(--turq));}
+  .kpi b{font-family:'Poppins',sans-serif;font-size:21px;line-height:1;display:block;}
+  .kpi span{font-size:10.5px;color:var(--ink-dim);line-height:1.25;display:block;margin-top:4px;}
+  .finds{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .find{background:var(--bg-card);border:1px solid var(--line);border-radius:12px;padding:11px 12px;border-top:4px solid var(--f,var(--turq));}
+  .find .eyebrow{font-size:9.5px;}
+  .find h4{font-size:13px;margin-top:5px;line-height:1.3;}
+  .find p{font-size:11.5px;color:var(--ink-dim);margin:5px 0 0;line-height:1.4;}
+  .zones{display:flex;flex-direction:column;gap:6px;}
+  .zone{background:var(--bg-card);border:1px solid var(--line);border-radius:12px;padding:0;border-left:5px solid var(--z);}
+  .zone summary{list-style:none;cursor:pointer;padding:9px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;font-weight:600;}
+  .zone summary::-webkit-details-marker{display:none;}
+  .zone summary .n{font-family:'JetBrains Mono',monospace;font-weight:500;font-size:11px;color:var(--ink-dim);}
+  .zone summary .chev{transition:transform .2s ease;color:var(--ink-dim);}
+  .zone[open] summary .chev{transform:rotate(90deg);}
+  .zone .zbody{padding:0 12px 11px;font-size:12px;color:var(--ink-dim);}
+  .zone .dlist{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:7px;}
+  .zone .dlist span{font-size:11px;background:var(--soft);border:1px solid var(--line);border-radius:20px;padding:2px 8px;color:var(--ink);}
+
+  /* ---- Objetivos ---- */
+  .obj{background:var(--bg-card);border:1px solid var(--line);border-radius:12px;margin-bottom:8px;}
+  .obj summary{list-style:none;cursor:pointer;padding:10px 12px 11px;}
+  .obj summary::-webkit-details-marker{display:none;}
+  .obj .o-top{display:flex;justify-content:space-between;align-items:center;gap:8px;}
+  .obj .o-name{font-size:13px;font-weight:600;line-height:1.25;}
+  .obj .o-name .n{font-family:'JetBrains Mono',monospace;font-weight:400;font-size:10px;color:var(--ink-dim);display:block;margin-bottom:1px;}
+  .lvl{font-family:'JetBrains Mono',monospace;font-size:10px;padding:3px 8px;border-radius:20px;white-space:nowrap;font-weight:600;}
+  .steps{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;margin-top:8px;}
+  .steps i{height:7px;border-radius:4px;background:var(--track-lo);display:block;}
+  .obj .o-body{padding:0 12px 12px;border-top:1px dashed var(--line);margin:0 12px;padding:10px 0 12px;}
+  .ev{list-style:none;padding:0;margin:0;font-size:12px;}
+  .ev li{display:grid;grid-template-columns:16px 1fr;gap:6px;margin-bottom:6px;line-height:1.4;}
+  .ev li .ic{font-weight:700;}
+  .ev li.ok .ic{color:var(--turq);}
+  .ev li.pd .ic{color:var(--naran);}
+  .ev li.pd{color:var(--ink-dim);}
+  .scale-legend{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--ink-dim);margin:-4px 2px 12px;}
+
+  /* ---- Madurez ---- */
+  .mad-head{display:flex;gap:14px;align-items:center;background:var(--bg-card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:12px;}
+  .mad-head svg{flex-shrink:0;}
+  .mad-head b{font-family:'Poppins',sans-serif;font-size:16px;display:block;}
+  .mad-head span{font-size:11.5px;color:var(--ink-dim);}
+  .mrow{display:grid;grid-template-columns:118px 1fr;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);align-items:start;}
+  .mrow:last-child{border-bottom:none;}
+  .mrow .dim{font-size:12.5px;font-weight:600;line-height:1.3;}
+  .seg{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin-bottom:5px;}
+  .seg i{height:8px;border-radius:4px;background:var(--track-lo);display:block;}
+  .seg-lab{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--ink-dim);margin-bottom:4px;}
+  .mrow p{font-size:11.5px;color:var(--ink-dim);margin:0;line-height:1.4;}
+
+  /* ---- Territorio ---- */
+  .big{display:flex;gap:12px;align-items:stretch;}
+  .big .card{flex:1;background:var(--bg-card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;}
+  .big .num{font-family:'Poppins',sans-serif;font-size:26px;font-weight:700;line-height:1.05;}
+  .big .lbl{font-size:11px;color:var(--ink-dim);margin-top:4px;line-height:1.35;}
+  .big .card.hot{border-bottom:4px solid var(--dep);}
+  .pairs{display:flex;flex-direction:column;gap:11px;}
+  .pair .p-top{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;}
+  .pair .p-top b{font-weight:600;}
+  .pair .p-top span{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-dim);}
+  .bar2{position:relative;height:9px;border-radius:5px;background:var(--track-lo);margin-bottom:3px;}
+  .bar2 i{position:absolute;left:0;top:0;bottom:0;border-radius:5px;display:block;}
+  .legend-mini{display:flex;gap:14px;font-size:11px;color:var(--ink-dim);margin:0 0 10px;}
+  .legend-mini span{display:flex;align-items:center;gap:5px;}
+  .legend-mini i{width:14px;height:7px;border-radius:4px;display:inline-block;}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+  .mini{background:var(--bg-card);border:1px solid var(--line);border-radius:12px;padding:9px 10px;}
+  .mini b{font-family:'Poppins',sans-serif;font-size:17px;display:block;line-height:1.1;}
+  .mini span{font-size:10.5px;color:var(--ink-dim);display:block;margin-top:3px;line-height:1.3;}
+  .equip{display:flex;flex-wrap:wrap;gap:6px;}
+  .equip span{font-size:11.5px;background:var(--bg-card);border:1px solid var(--line);border-radius:20px;padding:4px 10px;}
+  .equip span b{font-family:'Poppins',sans-serif;}
+  .eap{display:flex;align-items:flex-end;gap:10px;height:72px;margin-top:4px;}
+  .eap .c{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;}
+  .eap .c i{width:100%;border-radius:5px 5px 2px 2px;background:var(--mari);display:block;}
+  .eap .c span{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-dim);margin-top:3px;}
+  .eap .c b{font-size:11px;margin-bottom:2px;}
+
+  /* ---- Normativa ---- */
+  .filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+  .chip{display:flex;align-items:center;gap:6px;background:var(--bg-card);border:1.5px solid var(--line);border-radius:30px;padding:4px 10px 4px 7px;font-size:11.5px;font-weight:500;cursor:pointer;user-select:none;}
+  .chip .dot{width:9px;height:9px;border-radius:50%;}
+  .chip[aria-pressed="false"]{opacity:.38;}
+  .tl{position:relative;padding-left:16px;}
+  .tl::before{content:"";position:absolute;left:4px;top:4px;bottom:4px;width:2px;background:var(--line);border-radius:2px;}
+  .tl-year{font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;margin:12px 0 6px -16px;padding-left:16px;position:relative;}
+  .tl-year:first-child{margin-top:0;}
+  .tl-year::before{content:"";position:absolute;left:0;top:5px;width:10px;height:10px;border-radius:50%;background:var(--ink);}
+  .ord{position:relative;background:var(--bg-card);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:6px;}
+  .ord::before{content:"";position:absolute;left:-18px;top:13px;width:10px;height:10px;border-radius:50%;background:var(--e);border:2px solid var(--bg);}
+  .ord .o1{display:flex;justify-content:space-between;gap:8px;align-items:baseline;}
+  .ord .num{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;}
+  .ord .src{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--ink-dim);}
+  .ord p{font-size:12px;margin:3px 0 0;line-height:1.38;}
+  .ord .warn{font-size:10.5px;color:#B26A00;margin-top:3px;}
+  .ord.key{border-color:var(--dep);box-shadow:inset 3px 0 0 var(--dep);}
+
+  /* ---- Agenda ---- */
+  .prob{background:var(--bg-card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;}
+  .prob .p1{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;}
+  .prob h4{font-size:12.5px;font-weight:600;line-height:1.35;font-family:'Inter',sans-serif;}
+  .prob h4 .n{font-family:'JetBrains Mono',monospace;font-weight:400;font-size:10px;color:var(--ink-dim);display:block;}
+  .prob p{font-size:11.5px;color:var(--ink-dim);margin:5px 0 0;line-height:1.4;}
+  .st{font-family:'JetBrains Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;padding:3px 8px;border-radius:20px;white-space:nowrap;font-weight:600;}
+  .st.av{background:#E5F9F2;color:#0E8E6D;}
+  .st.cu{background:#FFF4D6;color:#8A5D00;}
+  .st.re{background:#FFE6E4;color:#B3261E;}
+  .hitos{position:relative;padding-left:18px;}
+  .hitos::before{content:"";position:absolute;left:5px;top:6px;bottom:6px;width:2px;background:linear-gradient(var(--mari),var(--dep));border-radius:2px;}
+  .hito{position:relative;margin-bottom:10px;}
+  .hito::before{content:"";position:absolute;left:-17px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--bg);border:2.5px solid var(--h,var(--dep));}
+  .hito .when{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-dim);}
+  .hito b{font-size:12.5px;display:block;line-height:1.35;}
+  .hito p{font-size:11.5px;color:var(--ink-dim);margin:2px 0 0;line-height:1.4;}
+
+  /* ---- Fuentes ---- */
+  .src-list{font-size:11.5px;color:var(--ink-dim);padding-left:16px;margin:0;}
+  .src-list li{margin-bottom:6px;line-height:1.4;}
+  .src-list b{color:var(--ink);}
+  .note{font-size:11.5px;color:var(--ink-dim);background:var(--soft);border:1px dashed var(--line);border-radius:10px;padding:10px 12px;line-height:1.45;}
+  .note b{color:var(--ink);}
+  .use-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .use{background:var(--bg-card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:11.5px;color:var(--ink-dim);border-top:4px solid var(--u);}
+  .use b{color:var(--ink);display:block;font-size:12px;margin-bottom:4px;}
+  .use ul{margin:0;padding-left:15px;}
+  .use li{margin-bottom:3px;}
+
+  @keyframes pulse{0%{r:10;opacity:.55}100%{r:30;opacity:0}}
+  .pulse{animation:pulse 2.2s ease-out infinite;}
+  @media (prefers-reduced-motion: reduce){ .pulse{animation:none;opacity:0;} .pop-body{scroll-behavior:auto;} }
+
+  @media (max-width:860px){
+    .stage{display:block;min-height:0;padding:12px;}
+    .map{position:relative;height:230px;flex-shrink:0;}
+    .map-title{display:none;}
+    .map-caption{top:12px;bottom:auto;left:auto;right:12px;}
+    .radar-box{max-width:300px;margin:0 auto;}
+    .popup{width:auto;max-width:none;height:auto;}
+    .pop-body{overflow:visible;}
+  }
+  @media (max-width:420px){
+    .facts{grid-template-columns:1fr 1fr 1fr;}
+    .sum-grid{grid-template-columns:1fr;}
+    .kpis{flex-direction:row;}
+    .kpi{flex:1;}
+    .finds{grid-template-columns:1fr;}
+    .grid3{grid-template-columns:1fr 1fr;}
+    .mrow{grid-template-columns:1fr;gap:6px;}
+    .use-grid{grid-template-columns:1fr;}
+  }
+  .h-aprob{position:absolute;top:-3px;width:10px;height:18px;border-radius:3px;background:var(--bg-card);border:2px solid var(--ink-dim);transform:translateX(-50%);}
+  .zone .zplain{padding:9px 12px 10px;}
+  .zone .zplain b{font-size:12.5px;display:block;margin-bottom:6px;}
+  .zone .zplain .dlist{margin-bottom:0;}
+  .chip .cnt{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-dim);}
+  /* ---- Banda institucional (común a todas las fichas) ---- */
+  .inst-band{display:flex;gap:10px;align-items:center;padding:10px 16px 10px 14px;border-radius:20px 20px 0 0;
+    background:#2B2440;color:#FFF9EF;}
+  .inst-band svg{flex-shrink:0;display:block;}
+  .inst-band .t1{font-family:'Poppins',sans-serif;font-size:12.5px;font-weight:600;line-height:1.25;}
+  .inst-band .t2{font-size:10.5px;line-height:1.35;color:#D9D3EA;margin-top:2px;}
+  .inst-band .t2 b{color:#FFF9EF;font-weight:600;}
+  .inst-band + .pop-head{border-radius:0;}
+  .inst-band + .pop-head::before{border-radius:0;}
+  .h-track.open{background:repeating-linear-gradient(90deg,var(--track-lo) 0 6px,transparent 6px 10px);}
+  .etapas{display:flex;flex-direction:column;gap:6px;margin-top:10px;}
+  .etapa{display:flex;gap:8px;align-items:center;font-size:12.5px;}
+  .etapa .ei{font-weight:700;width:14px;text-align:center;}
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+
+  <article class="popup" id="popup" aria-label="Ficha de ordenamiento territorial">
+    <!-- contenido generado por renderFicha() -->
+  </article>
+</div>
+
+<script>
+/* ===== DATOS DEL DEPARTAMENTO (reemplazar por el de cada departamento) ===== */
+const FICHA = {
+  id:"SM",
+  nombre:"San Martín",
+  region:"Región Este",
+  color:"#7A2E8E",
+  corte:"Noviembre 2026",
+
+  pmot:{
+    estado:"aprobado",
+    norma:"Ord. N° 3.122/2023",
+    anioInicio:2020, anioAprob:2023, horizonte:null, anioActual:2026,
+    reglamento:"Cap. 2 del PMOT"
+  },
+
+  kpi3:{n:"26", t:"subprogramas en 7 programas, con responsable, plazo e indicador"},
+
+  racimo:{
+    titulo:"Nodos y polos jerarquizados",
+    enResumen:true,
+    grupos:[
+      {nombre:"Nodos regionales", color:"#7A2E8E", distritos:["San Martín","Palmira"]},
+      {nombre:"Nodo subregional", color:"#B5179E", distritos:["Ingeniero Giagnoni"]},
+      {nombre:"Polo agroproductivo", color:"#5E8C1F", distritos:["Montecaseros","Chapanay","Tres Porteñas"]},
+      {nombre:"Polo logístico-industrial", color:"#FFB100", distritos:["PASIP (Palmira)"]}
+    ]
+  },
+
+  estructura:{
+    titulo:"Cómo se organiza el plan",
+    items:[
+      {nombre:"Programa 1 · Gestión territorial", color:"#E0457B", n:"4 subprogramas",
+       chips:["1A Gestión coordinada y participativa","1B Normalización y control","1C Innovación y modernización","1D Integración territorial"],
+       texto:"Gestión coordinada, moderna, eficiente, transparente y participativa."},
+      {nombre:"Programa 2 · Desarrollo logístico", color:"#FFB100", n:"2 subprogramas",
+       chips:["2A Fortalecimiento de nodos","2B Capacidad local para el empleo logístico"],
+       texto:"Polo Logístico integrador del Este y Nodo Multimodal Palmira en el Corredor Bioceánico."},
+      {nombre:"Programa 3 · Hábitat", color:"#FF6259", n:"7 subprogramas",
+       chips:["3A Vivienda","3B Salud","3C Educación","3D Inclusión social","3E Regularización dominial","3F Seguridad","3G Residuos sólidos urbanos"],
+       texto:"Hábitat con enfoque de derechos: infraestructura, equipamiento, espacios verdes y servicios."},
+      {nombre:"Programa 4 · Mitigación de riesgos", color:"#1FBFA3", n:"1 subprograma",
+       chips:["4A Plan de mitigación de zona de riesgo"],
+       texto:"Sostenibilidad ambiental y riesgos en el oasis y las zonas no irrigadas, con cambio climático."},
+      {nombre:"Programa 5 · Conectividad territorial", color:"#FF8A3D", n:"3 subprogramas",
+       chips:["5A Conectividad vial","5B Transporte público","5C Conectividad digital y telefónica"],
+       texto:"Redes viales, de transporte y comunicación que integren el territorio."},
+      {nombre:"Programa 6 · Matriz productiva", color:"#7A2E8E", n:"7 subprogramas",
+       chips:["6A Emprendedurismo","6B Planificación sectorial","6C Vitivinicultura local","6D Encadenamientos regionales","6E Competitividad","6F Inversión agropecuaria","6G Energía renovable"],
+       texto:"Ampliar e internacionalizar la economía con innovación, TIC y energías renovables."},
+      {nombre:"Programa 7 · Recursos hídricos", color:"#2F7FC1", n:"2 subprogramas",
+       chips:["7A Preservación de la cuenca","7B Aguas subterráneas para la producción"],
+       texto:"Acceso equitativo al agua para la población y la producción."}
+    ]
+  },
+
+  ppot:[
+    {id:1, corto:"Políticas interinstitucionales coordinadas", nivel:"Medio-Alto",
+     ev:["PMOT aprobado (Ord. 3.122/2023) con reglamento propio",
+         "Unidad de Planificación Territorial creada por Ord. 3.035/2021",
+         "Zonificación urbana actualizada por Ord. 3.190/2024",
+         "Centro de monitoreo regional de la Zona Este y relleno sanitario compartido (COINES)"],
+     pend:["Código de Edificación vigente desde 2007 y sin indicadores urbanos propios",
+           "Sin acciones relevadas de modernización digital (1C) ni de integración territorial formal (1D)"]},
+    {id:2, corto:"Nodos y polos de desarrollo", nivel:"Medio-Alto",
+     ev:["San Martín y Palmira jerarquizados como nodos regionales e Ingeniero Giagnoni como subregional",
+         "PASIP con el 70% de sus terrenos vendidos y una expansión prevista de 90 ha; Hub Logístico Mendoza Zona Este",
+         "Variante Palmira–Agrelo de la RN 7 y Multimodal de Carga integrada al ferrocarril",
+         "Escuela Superior de Oficios “Manuel Belgrano” para el empleo local (2B)"],
+     pend:["La expansión del PASIP está anunciada, no ejecutada"]},
+    {id:3, corto:"Hábitat adecuado", nivel:"Alto",
+     ev:["316 viviendas entregadas desde 2023, 48 en ejecución en Cavagnaro y 14 viviendas sustentables",
+         "Centro de Salud y Microhospital de Palmira",
+         "Obras escolares y Complejo Deportivo Palmira"],
+     pend:["Sin obras relevadas de residuos (3G) ni de inclusión social (3D)",
+           "NBI del 11,9%, por encima del promedio de la región Este (10,6%)"]},
+    {id:4, corto:"Ambiente, riesgos y cambio climático", nivel:"Sin evidencia",
+     ev:[],
+     pend:["No se relevaron obras ni acciones de mitigación de riesgos, líneas vitales o estudios climáticos (Programa 4)",
+           "Los desagües rurales anunciados en 2026 todavía no tienen detalle público"]},
+    {id:5, corto:"Conectividad física y digital", nivel:"Alto",
+     ev:["Doble Vía del Este (tramo San Martín de la RN 7) y nuevo puente sobre el río Mendoza (RP 31)",
+         "Reencarpetado de la RN 7 y del Carril Chivilcoy; ampliación de la Terminal de Ómnibus",
+         "Ciclovías en los carriles San Pedro y Barriales",
+         "Avance del Tren de Cercanías del Este"],
+     pend:["Sin acciones de conectividad digital (5C); internet en el 65% de los hogares"]},
+    {id:6, corto:"Matriz productiva y energía", nivel:"Bajo-Medio",
+     ev:["Mayor superficie con vid de la provincia: 18% del total",
+         "Plan Bonarda para dinamizar la vitivinicultura local (6C)",
+         "Polo agroproductivo y polo logístico-industrial de Palmira"],
+     pend:["El agro bajó del 28,2% al 17,4% del PBG entre 2004 y 2023, y el PBG creció solo un 28%",
+           "Sin proyectos relevados de emprendedurismo, energías renovables o encadenamientos productivos"]},
+    {id:7, corto:"Recurso hídrico y saneamiento", nivel:"Medio-Alto",
+     ev:["Ampliación del Establecimiento Depurador Palmira: más del 70% de avance, USD 3,08 M y 61.800 personas beneficiadas",
+         "Perforación de 230 m en Alto Salvador para 700 familias",
+         "Obras de agua, cloacas y desagües para zonas rurales anunciadas en abril de 2026"],
+     pend:["Falta de tecnificación del riego (informe de vectores económicos)"]}
+  ],
+
+  madurez:[
+    {dim:"Estado normativo", nivel:"Alto", nota:"Aprobado en 2023 con reglamento propio (Cap. 2) y zonificación urbana actualizada en 2024."},
+    {dim:"Zonificación y clasificación", nivel:"Alto", nota:"Clasificación de usos del suelo (Título III) y zonificación urbana vigente desde 2024; el Código de Edificación es de 2007."},
+    {dim:"Nodos y centralidades", nivel:"Medio", nota:"Nodos jerarquizados y ligados al PASIP, aunque el plan no explicita los criterios de jerarquización."},
+    {dim:"Participación", nivel:"Alto", nota:"Talleres con metodología de árbol de problemas, encuestas y entrevistas, sistematizados en el Cap. IV."},
+    {dim:"Instrumentos de gestión", nivel:"Alto", nota:"Programas, subprogramas y proyectos con responsable, prioridad, plazo e indicador de resultado."},
+    {dim:"Capacidades técnicas", nivel:"Alto", nota:"Unidad de Planificación Territorial específica (Ord. 3.035/2021)."},
+    {dim:"Información territorial", nivel:"Medio", nota:"PMOT publicado en el sitio municipal; no se identificó una IDE municipal."},
+    {dim:"Seguimiento", nivel:"Medio", nota:"Cada proyecto tiene indicador de resultado, aunque todavía no hay informe de avance (plan aprobado en 2023)."}
+  ],
+
+  territorio:{
+    poblacion:139792, partProv:7, crec:18.2, crecAMM:17.7, rankCrec:"11.º de 18",
+    refNombre:"Este", refTexto:"la región Este",
+    urbana:72, superficieKm2:1504,
+    pares:[
+      {lbl:"Hogares con agua de red", v:92, amm:93, prov:93, mejor:"alto"},
+      {lbl:"Hogares con cloacas", v:60, amm:55, prov:67, mejor:"alto"},
+      {lbl:"Hogares con gas de red", v:48, amm:50, prov:64, mejor:"alto"},
+      {lbl:"Población con NBI (eje 0-15%)", v:11.9, amm:10.6, prov:9.2, mejor:"bajo", escala:15},
+      {lbl:"Hogares propietarios", v:62, amm:63, prov:60, mejor:"alto"}
+    ],
+    minis:[
+      {n:"5%", t:"del PBG provincial con el 7% de la población"},
+      {n:"23,8%", t:"del PBG departamental es industrial"},
+      {n:"10.222", t:"empleos privados registrados (7 c/100 hab.)"},
+      {n:"6.191", t:"viviendas de déficit cuantitativo"},
+      {n:"4.597", t:"hogares en demanda RENHABIT"},
+      {n:"−43", t:"índice de brecha de capacidades (Este: −42)"}
+    ],
+    equip:[["236","establecimientos educativos"],["23","centros de salud"],["1","hospital público"],["5","hospitales privados"],["18%","de la superficie con vid de la provincia"]],
+    eap:[["2002",1311],["2008",978],["2018",722]]
+  },
+
+  ejes:{
+    "Plan y gestión":"#E0457B",
+    "Uso del suelo":"#6C63FF",
+    "Ambiente y riesgo":"#1FBFA3",
+    "Hábitat y suelo":"#FFB100",
+    "Producción y turismo":"#FF8A3D",
+    "Transparencia y participación":"#9AA0AE"
+  },
+  normativa:[
+    {anio:2007, num:"Código de Edificación", t:"Código de Edificación municipal vigente", eje:"Uso del suelo", src:"Informe Zona Este", warn:"Pendiente de actualización según la planilla de seguimiento."},
+    {anio:2021, num:"Ord. 3.035/2021", t:"Crea la Unidad de Planificación Territorial", eje:"Plan y gestión", src:"Informe Zona Este"},
+    {anio:2023, num:"Ord. 3.122/2023", t:"Aprueba el Plan Municipal de Ordenamiento Territorial", eje:"Plan y gestión", src:"Informe P-I", key:true},
+    {anio:2024, num:"Ord. 3.190/2024", t:"Actualiza la zonificación urbana", eje:"Uso del suelo", src:"Informe Zona Este", key:true}
+  ],
+
+  problemas:[
+    {n:1, t:"Deficiente planificación y gestión del OT, con problemas de coordinación interna y con la comunidad", st:"av", p:"Unidad de Planificación Territorial (2021), PMOT (2023) y zonificación urbana (2024)."},
+    {n:2, t:"No se aprovecha el potencial logístico de San Martín", st:"av", p:"PASIP con 70% vendido, Hub Logístico Zona Este y Multimodal de Carga."},
+    {n:3, t:"Carencia de planificación participativa para el hábitat y la equidad social", st:"cu", p:"316 viviendas y salud en Palmira; el NBI sigue sobre el promedio regional."},
+    {n:4, t:"Deterioro de las condiciones ambientales por causas antrópicas y naturales", st:"re", p:"Sin evidencia relevada del programa de mitigación de riesgos."},
+    {n:5, t:"Problemas de conectividad y aislamiento de poblaciones rurales", st:"av", p:"Doble Vía del Este, puente en RP 31, ciclovías y obras rurales de agua anunciadas."},
+    {n:6, t:"Falta de diversificación de la matriz productiva", st:"cu", p:"Plan Bonarda y Escuela de Oficios; el agro pierde peso en el PBG."},
+    {n:7, t:"Ineficiente gestión del recurso hídrico", st:"cu", p:"Depurador Palmira con más del 70% de avance y nuevas perforaciones."}
+  ],
+  hitos:[
+    {when:"2026", t:"Finalizar la ampliación del Depurador Palmira", p:"Más del 70% de avance, con fondos del resarcimiento (Decreto 3178).", c:"#1FBFA3"},
+    {when:"Anunciado", t:"Agua, cloacas y desagües en zonas rurales", p:"Presentado en la apertura de sesiones de abril de 2026.", c:"#2F7FC1"},
+    {when:"Previsto", t:"Expansión de 90 ha del PASIP", p:"Consolidación del Hub Logístico Mendoza Zona Este.", c:"#FFB100"},
+    {when:"Pendiente", t:"Código de Edificación e indicadores urbanos", p:"El código vigente es de 2007 y no hay indicadores urbanos propios.", c:"#6C63FF"},
+    {when:"Pendiente", t:"Dar visibilidad al Programa 4", p:"La mitigación de riesgos no registra evidencia pública.", c:"#FF6259"}
+  ],
+
+  hallazgos:[
+    {tag:"Ejes más fuertes", t:"Obj. 3 y 5, hábitat y conectividad", p:"316 viviendas, salud en Palmira, Doble Vía del Este y puente sobre el río Mendoza.", c:"#1FBFA3"},
+    {tag:"Eje a vigilar", t:"Obj. 4, ambiente y riesgo", p:"Sin evidencia de mitigación de riesgos: el mismo patrón que en toda la Zona Este.", c:"#FF6259"},
+    {tag:"Brecha institucional", t:"Código de Edificación de 2007", p:"Zonificación actualizada en 2024, pero el código de edificación y los indicadores urbanos siguen pendientes.", c:"#FF8A3D"},
+    {tag:"Dato distintivo", t:"El plan más trazable", p:"Cada proyecto tiene responsable, prioridad, plazo e indicador: la estructura más verificable de la Zona Este.", c:"#6C63FF"}
+  ],
+
+  uso:{
+    si:["Niveles por objetivo del informe Avance PMOT Zona Este, actualizados con evidencia 2026","Matriz de madurez (8 dimensiones)","Indicadores del Censo 2022 frente a la región Este y PBG por rama","7 programas, 26 subprogramas y 7 problemas del PMOT","4 normas del informe de la Zona Este y del diagnóstico provincial"],
+    no:["La planilla de ordenanzas no incluye a San Martín","Sección de minería, aún en construcción","Borrador de matriz de incidencia de actores, sin datos por departamento"]
+  },
+
+  fuentes:[
+    ["Avance PMOT Zona Este (agosto 2026)","Niveles de avance por objetivo, evidencia de obras y normativa de San Martín; escala y método comunes."],
+    ["Diagnóstico Subsistema Político Institucional (actualización PPOT, 2026)","Tabla 2 (Ord. 3.122/2023, con enlace), ficha de San Martín, matriz de madurez y polos logísticos."],
+    ["Informe parcial Subsistema Socioeconómico (CFI, abril 2026)","Población, NBI, servicios, vivienda, PBG por rama (Tabla B14), empleo, capital humano, vid y explotaciones."],
+    ["Planilla ORDENANZAS MUNICIPIOS","Hoja de áreas de OT: Unidad de Planificación Territorial."],
+    ["Objetivos de los PMOTs (provincia)","7 objetivos, programas y 26 subprogramas del PMOT de San Martín."],
+    ["Gobierno de Mendoza (enero 2026)","Decreto 3178: ampliación del Establecimiento Depurador Palmira."],
+    ["Prensa 2026 (Diario Uno, Diario Mendoza, Ciudadano News, Mendoza Post, MendoVoz, Soy del Este)","Apertura de sesiones, PASIP, Hub Logístico, obras rurales, ciclovías y Complejo Deportivo Palmira."]
+  ],
+
+  mapa:{
+    poligono:"M200,250 L470,240 L500,430 L230,450 Z",
+    pin:[340,320], lbl:[300,405],
+    vecinos:[
+      ["Lavalle","M120,40 L620,30 L620,240 L470,240 L200,250 L120,230 Z",360,140],
+      ["Maipú","M20,250 L200,250 L230,450 L40,460 Z",110,350],
+      ["Junín","M230,450 L500,430 L520,560 L250,580 Z",370,510],
+      ["Rivadavia","M40,460 L230,450 L250,580 L60,600 Z",140,530],
+      ["Santa Rosa","M470,240 L620,240 L700,450 L500,430 Z",590,340]
+    ],
+    rio:"M-700,240 C-300,240 0,250 200,248 S470,238 620,200 S800,150 1000,120",
+    rioLbl:[40,234]
+  }
+};
+
+</script>
+<script>
+/* =====================================================================
+   MOTOR DE RENDER — común a todas las fichas departamentales.
+   Uso en el visor: renderFicha(FICHA_DEPTO, contenedor)
+   ===================================================================== */
+const NIVELES = {"Sin PMOT":0,"Sin evidencia":1,"Bajo":2,"Bajo-Medio":3,"Medio":4,"Medio-Alto":5,"Alto":6};
+const NIVEL_COLOR = ["#C9C4D3","#D9D2C3","#FF6259","#FF8A3D","#FFB100","#5CD0B6","#1FBFA3"];
+const NIVEL_TEXT  = ["#4A4458","#5A5446","#FFFFFF","#FFFFFF","#3D2A00","#063B30","#FFFFFF"];
+const MADUREZ = {"Bajo":1,"Medio":2,"Alto":3};
+const MAD_COLOR = ["", "#FF6259", "#FFB100", "#1FBFA3"];
+const fmt = n => n.toLocaleString('es-AR');
+const dec = v => String(v).replace('.',',');
+
+function lvlChip(nivel){
+  const r = NIVELES[nivel];
+  return `<span class="lvl" style="background:${NIVEL_COLOR[r]};color:${NIVEL_TEXT[r]}">${nivel}</span>`;
+}
+
+function grapes(F){
+  // un grano por distrito, color por grupo; filas decrecientes (racimo)
+  const ds = []; F.racimo.grupos.forEach(g=>g.distritos.forEach(d=>ds.push({d, c:g.color, g:g.nombre})));
+  const n = ds.length; let w = 1; while(w*(w+1)/2 < n) w++;
+  const rows=[]; let left=n, k=w; while(left>0){ const r=Math.min(k,left); rows.push(r); left-=r; k=Math.max(1,k-1); }
+  let i=0, out='';
+  rows.forEach((cnt,ri)=>{ for(let j=0;j<cnt;j++){ const g=ds[i++];
+    const x=34+(j-(cnt-1)/2)*11.5, y=20+ri*9.6;
+    out+=`<circle cx="${x}" cy="${y}" r="5.6" fill="${g.c}" stroke="var(--bg)" stroke-width="1.6"><title>${g.d} (${g.g})</title></circle>`; } });
+  const h = 20 + rows.length*9.6 + 6;
+  return `<svg width="68" height="${h}" viewBox="0 0 68 ${h}" role="img" aria-label="${F.racimo.titulo}">
+    <path d="M34 3 C33 8 35 11 34 15" stroke="#5B8A3A" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+    <ellipse cx="41" cy="7" rx="7" ry="3.8" fill="#7FBB4F" transform="rotate(28 41 7)"/>${out}</svg>`;
+}
+
+function radar(F){
+  const size=300, cx=150, cy=152, minR=12, maxR=100, n=F.ppot.length;
+  const ang = i => -Math.PI/2 + i*(2*Math.PI/n);
+  const pos = (i,r) => { const R=minR+(r/6)*(maxR-minR); return [cx+R*Math.cos(ang(i)), cy+R*Math.sin(ang(i))]; };
+  let g='';
+  for(let ring=1; ring<=6; ring++) g += `<polygon points="${F.ppot.map((o,i)=>pos(i,ring).join(',')).join(' ')}" fill="none" stroke="var(--line)" stroke-width="1"/>`;
+  F.ppot.forEach((o,i)=>{ const [x,y]=pos(i,6); g+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="var(--line)"/>`; });
+  const pts = F.ppot.map((o,i)=>pos(i,NIVELES[o.nivel]).join(',')).join(' ');
+  let s = `<polygon points="${pts}" fill="${F.color}" fill-opacity=".16" stroke="${F.color}" stroke-width="2.6" stroke-linejoin="round"/>`;
+  F.ppot.forEach((o,i)=>{ const [x,y]=pos(i,NIVELES[o.nivel]);
+    s += `<circle cx="${x}" cy="${y}" r="4.4" fill="${F.color}" stroke="var(--bg)" stroke-width="1.6"><title>Obj. ${o.id}: ${o.nivel}</title></circle>`; });
+  let l='';
+  F.ppot.forEach((o,i)=>{ const [x,y]=pos(i,7.25); const c=Math.cos(ang(i));
+    l += `<text x="${x}" y="${y+3}" text-anchor="${c>0.3?'start':(c<-0.3?'end':'middle')}" font-size="10.5" font-family="JetBrains Mono, monospace" fill="var(--ink-dim)">Obj.${o.id}</text>`; });
+  return `<svg viewBox="0 0 ${size} ${size}" role="img" aria-label="Radar de avance en los 7 objetivos del PPOT">${g}${s}${l}</svg>`;
+}
+
+function panelResumen(F){
+  const P=F.pmot, ini=P.anioInicio;
+  const altos = F.ppot.filter(o=>NIVELES[o.nivel]>=5).length;
+  const madA = F.madurez.filter(m=>m.nivel==='Alto').length;
+  const E=F.estructura;
+  let horizonte;
+  if(P.estado!=='aprobado'){
+    const ic={ok:'✓',cu:'●',pd:'○'}, col={ok:'var(--turq)',cu:'var(--mari)',pd:'var(--gris)'};
+    horizonte = `<div class="horizon">
+      <div class="row"><span class="eyebrow">Estado del plan</span><b>PMOT en elaboración</b></div>
+      <div class="etapas">${(P.etapas||[]).map(e=>`<div class="etapa"><span class="ei" style="color:${col[e.st]}">${ic[e.st]}</span><span>${e.t}</span></div>`).join('')}</div>
+    </div>`;
+  } else {
+    const sinH = !P.horizonte;
+    const fin = sinH ? P.anioActual + 4 : P.horizonte;
+    const tot=fin-ini, trans=P.anioActual-ini, pct=trans/tot*100;
+    const pA = (P.anioAprob-ini)/tot*100;
+    horizonte = `<div class="horizon">
+    <div class="row"><span class="eyebrow">Horizonte del plan</span><b>${sinH?`${P.anioActual-P.anioAprob} ${P.anioActual-P.anioAprob===1?'año':'años'} de vigencia`:`Año ${trans} de ${tot}`}</b></div>
+    <div class="h-track${sinH?' open':''}"><div class="h-fill" style="width:${pct}%"></div>
+      ${P.anioAprob!==ini?`<div class="h-aprob" style="left:${pA}%" title="Aprobación ${P.anioAprob}"></div>`:''}
+      <div class="h-now" style="left:${pct}%" title="${P.anioActual}"></div></div>
+    <div class="h-scale"><span>${ini} ${P.anioAprob===ini?'aprobación':'inicio'}</span>${P.anioAprob!==ini?`<span>${P.anioAprob} aprobación</span>`:''}<span>${P.anioActual}</span><span>${sinH?'horizonte no explicitado':P.horizonte}</span></div>
+  </div>`;
+  }
+  const leyenda = F.racimo.enResumen ? `<h3 class="sub-h">${F.racimo.titulo}</h3>
+    <div class="zones">${F.racimo.grupos.map(g=>`<div class="zone" style="--z:${g.color}"><div class="zplain"><b>${g.nombre}</b><div class="dlist">${g.distritos.map(d=>`<span>${d}</span>`).join('')}</div></div></div>`).join('')}</div>` : '';
+  return `${horizonte}
+  <div class="sum-grid">
+    <div class="radar-box">${radar(F)}</div>
+    <div class="kpis">
+      <div class="kpi" style="--k:var(--turq)"><b>${altos}/7</b><span>objetivos PPOT en nivel medio-alto o alto</span></div>
+      <div class="kpi" style="--k:var(--viol)"><b>${madA}/8</b><span>dimensiones de madurez en nivel alto</span></div>
+      <div class="kpi" style="--k:var(--dep)"><b>${F.kpi3.n}</b><span>${F.kpi3.t}</span></div>
+    </div>
+  </div>
+  <h3 class="sub-h">Lectura rápida</h3>
+  <div class="finds">${F.hallazgos.map(h=>`<div class="find" style="--f:${h.c}"><div class="eyebrow">${h.tag}</div><h4>${h.t}</h4><p>${h.p}</p></div>`).join('')}</div>
+  <h3 class="sub-h">${E.titulo}</h3>
+  <div class="zones">${E.items.map(z=>`
+    <details class="zone" style="--z:${z.color}">
+      <summary><span>${z.nombre}</span><span class="n">${z.n} <span class="chev">›</span></span></summary>
+      <div class="zbody">${z.chips&&z.chips.length?`<div class="dlist">${z.chips.map(d=>`<span>${d}</span>`).join('')}</div>`:''}${z.texto||''}</div>
+    </details>`).join('')}</div>
+  ${leyenda}`;
+}
+
+function panelObjetivos(F){
+  return `<p class="lead">Nivel estimado de avance frente a los siete objetivos del PPOT (Ley N° 8.999). Tocá un objetivo para ver la evidencia y lo pendiente.</p>
+  <div class="scale-legend"><span>Sin evid.</span><span>Bajo</span><span>Bajo-Medio</span><span>Medio</span><span>Medio-Alto</span><span>Alto</span></div>
+  ${F.ppot.map(o=>{
+    const r=NIVELES[o.nivel];
+    const steps=[1,2,3,4,5,6].map(k=>`<i style="${k<=r?`background:${NIVEL_COLOR[r]}`:''}"></i>`).join('');
+    return `<details class="obj">
+      <summary><div class="o-top"><div class="o-name"><span class="n">Objetivo ${o.id}</span>${o.corto}</div>${lvlChip(o.nivel)}</div>
+      <div class="steps" aria-hidden="true">${steps}</div></summary>
+      <div class="o-body"><ul class="ev">
+        ${o.ev.map(e=>`<li class="ok"><span class="ic" aria-label="Avance">✓</span><span>${e}</span></li>`).join('')}
+        ${o.pend.map(e=>`<li class="pd"><span class="ic" aria-label="Pendiente">○</span><span>${e}</span></li>`).join('')}
+      </ul></div></details>`;
+  }).join('')}`;
+}
+
+function panelMadurez(F){
+  const c={Alto:0,Medio:0,Bajo:0}; F.madurez.forEach(m=>c[m.nivel]++);
+  const score = F.madurez.reduce((a,m)=>a+MADUREZ[m.nivel],0)/F.madurez.length;
+  const cap = score>=2.5?'Alta':(score>=1.75?'Media':'Baja');
+  const R=28, C=2*Math.PI*R, gap=3, segL=C/8-gap; let off=0, ring='';
+  F.madurez.forEach(m=>{ ring+=`<circle cx="36" cy="36" r="${R}" fill="none" stroke="${MAD_COLOR[MADUREZ[m.nivel]]}" stroke-width="9" stroke-dasharray="${segL} ${C-segL}" stroke-dashoffset="${-off}" transform="rotate(-90 36 36)"><title>${m.dim}: ${m.nivel}</title></circle>`; off+=C/8; });
+  return `<div class="mad-head">
+    <svg width="72" height="72" viewBox="0 0 72 72" role="img" aria-label="Capacidad ${cap}">${ring}<text x="36" y="40" text-anchor="middle" font-family="Poppins, sans-serif" font-weight="700" font-size="13" fill="var(--ink)">${dec(score.toFixed(1))}</text></svg>
+    <div><span class="eyebrow">Capacidad de implementación</span><b>${cap}</b><span>${c.Alto} ${c.Alto===1?'dimensión':'dimensiones'} en nivel alto, ${c.Medio} en medio y ${c.Bajo} en bajo (escala 1 a 3).</span></div>
+  </div>
+  <p class="lead">Matriz de madurez institucional propuesta por el diagnóstico político-institucional del PPOT para todos los municipios.</p>
+  <div class="mrow" style="padding:0 0 4px;border:none"><div></div><div class="seg-lab" style="margin:0"><span>Bajo</span><span>Medio</span><span>Alto</span></div></div>
+  ${F.madurez.map(m=>{ const r=MADUREZ[m.nivel];
+    return `<div class="mrow"><div class="dim">${m.dim}</div><div>
+      <div class="seg" aria-label="${m.nivel}">${[1,2,3].map(k=>`<i style="${k<=r?`background:${MAD_COLOR[r]}`:''}"></i>`).join('')}</div>
+      <p>${m.nota}</p></div></div>`; }).join('')}`;
+}
+
+function panelTerritorio(F){
+  const T=F.territorio, RN=T.refNombre||'AMM', RT=T.refTexto||'el AMM';
+  const pares = T.pares.map(p=>{
+    const max=p.escala||100;
+    const better = p.mejor==='alto' ? p.v>=p.amm : p.v<=p.amm;
+    return `<div class="pair"><div class="p-top"><b>${p.lbl}</b><span>${dec(p.v)}% · ${RN} ${dec(p.amm)}% · Prov. ${dec(p.prov)}%</span></div>
+      <div class="bar2"><i style="width:${p.v/max*100}%;background:${better?'var(--turq)':'var(--coral)'}"></i></div>
+      <div class="bar2" style="height:5px"><i style="width:${p.amm/max*100}%;background:var(--gris)"></i></div></div>`;
+  }).join('');
+  const maxE=Math.max(...T.eap.map(e=>e[1]));
+  return `<div class="big">
+    <div class="card hot"><div class="num">+${dec(T.crec)}%</div><div class="lbl">crecimiento poblacional 2010-2022, ${T.rankCrec} departamentos (${RN}: +${dec(T.crecAMM)}%)</div></div>
+    <div class="card"><div class="num">${fmt(T.poblacion)}</div><div class="lbl">habitantes en 2022, ${T.partProv}% de la provincia; ${T.urbana}% urbana</div></div>
+  </div>
+  <h3 class="sub-h">Servicios y condiciones de vida frente a ${RT}</h3>
+  <div class="legend-mini"><span><i style="background:var(--turq)"></i>${F.nombre}, mejor o igual</span><span><i style="background:var(--coral)"></i>${F.nombre}, peor</span><span><i style="background:var(--gris)"></i>Promedio ${RN}</span></div>
+  <div class="pairs">${pares}</div>
+  <h3 class="sub-h">Economía y vivienda</h3>
+  <div class="grid3">${T.minis.map(m=>`<div class="mini"><b>${m.n}</b><span>${m.t}</span></div>`).join('')}</div>
+  <h3 class="sub-h">Pequeñas explotaciones agropecuarias (hasta 5 ha)</h3>
+  ${maxE<5 ? `<p class="lead" style="margin:0">Sin explotaciones agropecuarias relevantes en los censos nacionales agropecuarios 2002, 2008 y 2018.</p>` :
+  `<div class="eap">${T.eap.map(e=>`<div class="c"><b>${fmt(e[1])}</b><i style="height:${e[1]/maxE*52}px"></i><span>${e[0]}</span></div>`).join('')}</div>`}
+  <h3 class="sub-h">Equipamiento</h3>
+  <div class="equip">${T.equip.map(e=>`<span><b>${e[0]}</b> ${e[1]}</span>`).join('')}</div>`;
+}
+
+let ejeActivo = {};
+function panelNormativa(F){
+  Object.keys(F.ejes).forEach(k=>{ if(!(k in ejeActivo)) ejeActivo[k]=true; });
+  const chips = Object.entries(F.ejes).map(([k,c])=>`<button class="chip" aria-pressed="${ejeActivo[k]}" data-eje="${k}"><span class="dot" style="background:${c}"></span>${k} <span class="cnt">${F.normativa.filter(o=>o.eje===k).length}</span></button>`).join('');
+  const items = F.normativa.filter(o=>ejeActivo[o.eje]);
+  const years = [...new Set(items.map(o=>o.anio))].sort((a,b)=>(a===null)-(b===null) || a-b);
+  const tl = years.map(y=>`<div class="tl-year">${y===null?'Sin año':y}</div>` + items.filter(o=>o.anio===y).map(o=>`
+    <div class="ord${o.key?' key':''}" style="--e:${F.ejes[o.eje]}"><div class="o1"><span class="num">${o.num}</span><span class="src">${o.src}</span></div>
+    <p>${o.t}</p>${o.warn?`<div class="warn">${o.warn}</div>`:''}</div>`).join('')).join('');
+  if(!F.normativa.length) return `<div class="note">${F.normativaNota||'No se relevaron normas municipales vinculadas al OT en las fuentes disponibles.'}</div>`;
+  return `<p class="lead">${F.normativa.length} ${F.normativa.length===1?'norma municipal vinculada':'normas municipales vinculadas'} al OT, de la planilla de ordenanzas y de fuentes web. Filtrá por eje.</p>${F.normativaNota?`<div class="note" style="margin-bottom:12px">${F.normativaNota}</div>`:''}
+    <div class="filters">${chips}</div>
+    <div class="tl">${tl || '<p class="lead">No hay normas para los ejes seleccionados. Activá al menos uno.</p>'}</div>`;
+}
+
+function panelAgenda(F){
+  const lab={av:'Con avances',cu:'En curso',re:'Rezagado'};
+  return `<h3 class="sub-h">${F.problemasTitulo||'Problemas estructurantes del PMOT'}</h3>
+  ${F.problemas.map(p=>`<div class="prob"><div class="p1"><h4><span class="n">Problema ${p.n}</span>${p.t}</h4><span class="st ${p.st}">${lab[p.st]}</span></div><p>${p.p}</p></div>`).join('')}
+  <h3 class="sub-h">Próximos hitos</h3>
+  <div class="hitos">${F.hitos.map(h=>`<div class="hito" style="--h:${h.c}"><span class="when">${h.when}</span><b>${h.t}</b><p>${h.p}</p></div>`).join('')}</div>`;
+}
+
+function panelFuentes(F){
+  return `<h3 class="sub-h">Método</h3>
+  <div class="note"><b>Estimación preliminar.</b> Los niveles surgen del contraste entre el PMOT, la normativa municipal, los indicadores censales y obras o acciones relevadas en fuentes públicas, con la misma escala del informe de la Zona Este. No sustituyen el seguimiento oficial del municipio ni de la APOT; la falta de evidencia no implica falta de ejecución.</div>
+  <h3 class="sub-h">Qué se usó de cada fuente</h3>
+  <div class="use-grid">
+    <div class="use" style="--u:var(--turq)"><b>Se usó</b><ul>${F.uso.si.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+    <div class="use" style="--u:var(--gris)"><b>Quedó fuera</b><ul>${F.uso.no.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+  </div>
+  <h3 class="sub-h">Fuentes</h3>
+  <ol class="src-list">${F.fuentes.map(f=>`<li><b>${f[0]}.</b> ${f[1]}</li>`).join('')}</ol>`;
+}
+
+const TABS = [
+  ["resumen","Resumen",panelResumen],
+  ["objetivos","Objetivos",panelObjetivos],
+  ["madurez","Madurez",panelMadurez],
+  ["territorio","Territorio",panelTerritorio],
+  ["normativa","Normativa",panelNormativa],
+  ["agenda","Agenda",panelAgenda]
+];
+
+/* Encabezado institucional: igual en todas las fichas */
+const INSTITUCIONAL = {
+  titulo:"Información sistematizada para seguimiento evaluativo",
+  autor:"Dirección de Planificación, Gobierno de Mendoza",
+  marco:"Leyes N° 8.051 y N° 8.999"
+};
+function bandaInstitucional(){
+  const I=INSTITUCIONAL;
+  return `<div class="inst-band" role="note" aria-label="${I.titulo}. Elaborado por ${I.autor}, según ${I.marco}">
+    <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true">
+      <path d="M15 2 L26 6.5 V14 C26 21 21 25.5 15 28 C9 25.5 4 21 4 14 V6.5 Z" fill="none" stroke="#FFB100" stroke-width="2" stroke-linejoin="round"/>
+      <path d="M9.5 19 L13 14.5 L16 17 L20.5 10.5" fill="none" stroke="#1FBFA3" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="20.5" cy="10.5" r="1.8" fill="#1FBFA3"/>
+    </svg>
+    <div><div class="t1">${I.titulo}</div>
+    <div class="t2">Elaborado por <b>${I.autor}</b>, según ${I.marco}</div></div>
+  </div>`;
+}
+
+function renderFicha(F, root){
+  document.documentElement.style.setProperty('--dep', F.color);
+  document.title = `Ficha OT — ${F.nombre}`;
+  const ok = F.pmot.estado==='aprobado', T=F.territorio, P=F.pmot;
+  root.insertAdjacentHTML('beforeend', `
+    ${bandaInstitucional()}
+    <header class="pop-head">
+      <div class="head-top">
+        <div class="txt">
+          <div class="eyebrow">Ficha OT · ${F.region}</div>
+          <h2>${F.nombre}</h2>
+          <div class="norma">${ok?'PMOT aprobado por '+P.norma:'PMOT en elaboración'}</div>
+        </div>
+        <div class="head-right"><span class="badge ${ok?'ok':'no'}">${ok?'Aprobado':'En elaboración'}</span><div class="grapes">${grapes(F)}</div></div>
+      </div>
+      <div class="facts">
+        <div class="fact"><b>${fmt(T.poblacion)}</b><span>habitantes (2022)</span></div>
+        <div class="fact"><b>${fmt(T.superficieKm2)} km²</b><span>superficie</span></div>
+        <div class="fact"><b>${P.reglamento?'Con reglamento':'Sin reglamento'}</b><span>${P.reglamento||'propio del PMOT'}</span></div>
+      </div>
+    </header>
+    <nav class="tabs" role="tablist" aria-label="Secciones de la ficha">
+      ${TABS.map((t,i)=>`<button class="tab" role="tab" id="tab-${t[0]}" aria-controls="panel-${t[0]}" aria-selected="${i===0}" tabindex="${i===0?0:-1}">${t[1]}</button>`).join('')}
+    </nav>
+    <div class="pop-body" id="popBody">
+      ${TABS.map((t,i)=>`<section class="panel" role="tabpanel" id="panel-${t[0]}" aria-labelledby="tab-${t[0]}" ${i===0?'':'hidden'}>${t[2](F)}</section>`).join('')}
+      <section class="panel" id="panel-fuentes" hidden>${panelFuentes(F)}</section>
+    </div>
+    <footer class="pop-foot"><span>Estimación preliminar · corte ${F.corte}</span><button class="linkbtn" id="btnFuentes">Fuentes y método</button></footer>`);
+
+  const tabs=[...root.querySelectorAll('.tab')], body=root.querySelector('#popBody');
+  function show(id){
+    root.querySelectorAll('.panel').forEach(p=>p.hidden = p.id!=='panel-'+id);
+    tabs.forEach(t=>{ const on=t.id==='tab-'+id; t.setAttribute('aria-selected',on); t.tabIndex=on?0:-1; });
+    body.scrollTop=0;
+  }
+  tabs.forEach((t,i)=>{
+    t.addEventListener('click',()=>show(t.id.slice(4)));
+    t.addEventListener('keydown',e=>{
+      if(e.key!=='ArrowRight'&&e.key!=='ArrowLeft') return;
+      const j=(i+(e.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length; tabs[j].focus(); show(tabs[j].id.slice(4));
+    });
+  });
+  root.querySelector('#btnFuentes').addEventListener('click',()=>show('fuentes'));
+  root.addEventListener('click',e=>{
+    const chip=e.target.closest('.chip'); if(!chip) return;
+    const k=chip.dataset.eje; ejeActivo[k]=!ejeActivo[k];
+    root.querySelector('#panel-normativa').innerHTML = panelNormativa(F);
+    root.querySelector(`.chip[data-eje="${CSS.escape(k)}"]`)?.focus();
+  });
+}
+
+renderFicha(FICHA, document.getElementById('popup'));
+
+</script>
+</body>
+</html>
